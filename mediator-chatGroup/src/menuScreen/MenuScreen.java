@@ -21,11 +21,11 @@ public class MenuScreen {
         String nome, email, senha;
         System.out.println("\n=================Realize seu cadastro=================");
         System.out.println("1- Insira seu nome:");
-        nome = sc.next();
+        nome = sc.nextLine();
         System.out.println("2- Insira seu email:");
         email = sc.next();
         System.out.println("3- Insira sua senha:");
-        senha = sc.next();
+        senha = sc.nextLine();
         UserController.signUp(nome, senha, email);
     }
 
@@ -37,7 +37,7 @@ public class MenuScreen {
         System.out.println("1- Insira seu email:");
         email = sc.next();
         System.out.println("2- Insira sua senha:");
-        senha = sc.next();
+        senha = sc.nextLine();
         return UserController.signIn(email, senha);
     }
 
