@@ -20,6 +20,7 @@ ChatScreen extends JFrame {
     private JTextField inputField; // Campo de entrada para novas mensagens
     private JButton sendButton; // Botão de enviar
     private JButton exitButton; // Botão de sair
+    private JButton deleteUserButton; //Botão para deletar usuário
     private JList<Message> messageList; // Lista de mensagens
     private DefaultListModel<Message> messageListModel; // Modelo da lista de mensagens
 
@@ -33,6 +34,7 @@ ChatScreen extends JFrame {
         inputField = new JTextField();
         sendButton = new JButton("Enviar");
         exitButton = new JButton("Sair");
+        deleteUserButton = new JButton("Excluir Usuário");
 
         // Modelo e lista de mensagens
         messageListModel = MessageList.getListModel();
@@ -46,6 +48,7 @@ ChatScreen extends JFrame {
         bottomPanel.add(inputField, BorderLayout.CENTER);
         bottomPanel.add(sendButton, BorderLayout.EAST);
         bottomPanel.add(exitButton, BorderLayout.WEST); // Ajustado para sair no canto esquerdo
+        bottomPanel.add(deleteUserButton, BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Ação do botão "Enviar"
@@ -70,6 +73,15 @@ ChatScreen extends JFrame {
             }
         });
 
+        // Botão Excluir
+        deleteUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                UserController.remove(UserController.getUserLogged().getEmail());
+                new LoginScreen().setVisible(true);
+                dispose();
+            }
+        });
         // Personalização dos componentes
         customizeComponents();
     }
@@ -120,6 +132,16 @@ ChatScreen extends JFrame {
             }
         });
 
+        deleteUserButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        deleteUserButton.setBackground(new Color(220, 20, 60));
+        deleteUserButton.setForeground(Color.WHITE);
+        deleteUserButton.setFocusPainted(false);
+        deleteUserButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        deleteUserButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        deleteUserButton.setOpaque(true);
+        deleteUserButton.setUI(new BasicButtonUI()); // Remover borda do botão padrão
+
+
         // Caixa de entrada (input)
         inputField.setFont(new Font("Arial", Font.PLAIN, 14));
         inputField.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
@@ -128,6 +150,8 @@ ChatScreen extends JFrame {
         inputField.setCaretColor(Color.BLACK);
         inputField.setPreferredSize(new Dimension(350, 30));
         inputField.setFocusTraversalKeysEnabled(false);
+
+
     }
 
     // Renderer para personalizar a exibição das mensagens na lista

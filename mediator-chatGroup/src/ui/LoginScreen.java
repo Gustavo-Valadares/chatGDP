@@ -28,6 +28,7 @@ public class LoginScreen extends JFrame {
         loginButton = new JButton("Login");
         registerButton = new JButton("Cadastrar");
 
+
         // Layout
         setLayout(new BorderLayout());
 
