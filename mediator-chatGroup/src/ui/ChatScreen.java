@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class ChatScreen extends JFrame {
     private JTextArea chatArea; // Exibe as mensagens do chat
@@ -52,7 +53,7 @@ public class ChatScreen extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String text = inputField.getText().trim();
                 if (!text.isEmpty()) {
-                    Mediator.sendMessage(text); // Envia a mensagem
+                    Mediator.sendMessage(UserController.getUserLogged().getNome(),text, UserController.getUserLogged().getEmail()); // Envia a mensagem
                     inputField.setText(""); // Limpa o campo de entrada
                 }
             }
@@ -154,12 +155,13 @@ public class ChatScreen extends JFrame {
         @Override
         public Component getListCellRendererComponent(JList<? extends Message> list, Message message, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
+
             // Configura o texto do usuário e da mensagem
-            userLabel.setText(message.getRemetente().getNome());
-            messageText.setText("<html>" + message.toString() + "</html>"); // Permite formatação HTML
+            userLabel.setText(message.toString().split("&")[0]);
+            messageText.setText(message.toString().split("&")[2]); // Permite formatação HTML
 
             // Alinha e define as cores de fundo dependendo do remetente
-            if (message.getRemetente() == UserController.getUserLogged()) {
+            if (Objects.equals(message.toString().split("&")[1], UserController.getUserLogged().getEmail())) {
                 setBackground(new Color(230, 245, 255)); // Mensagens do usuário logado com fundo suave
                 setLayout(new FlowLayout(FlowLayout.LEFT)); // Alinha à esquerda
             } else {
@@ -174,15 +176,5 @@ public class ChatScreen extends JFrame {
 
             return this;
         }
-    }
-
-    public static void main(String[] args) {
-        // Exemplo de execução da tela de chat
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new ChatScreen().setVisible(true);
-            }
-        });
     }
 }

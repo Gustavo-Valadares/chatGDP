@@ -16,7 +16,6 @@ public class UserController {
     }
 
     private static boolean createUser(String nome, String senha, String email) {
-        System.out.println(nome + " " + email + " " + senha);
         User newUser = new User(nome, senha, email);
         UserList.add(newUser);
         return true;
@@ -26,9 +25,7 @@ public class UserController {
         UserList.printUsers();
     }
 
-    public static User findUserById(int id) {
-        return UserList.findUserById(id);
-    }
+
 
     public static User findUserByEmail(String email) {
         return UserList.findUserByEmail(email);
@@ -58,4 +55,10 @@ public class UserController {
             return false;
         }
     }
+
+    public static boolean remove(String email) {
+        return UserList.remove(email);
+
+    }
+
 }
