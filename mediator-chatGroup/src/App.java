@@ -1,38 +1,30 @@
-import mediator.Mediator;
-import menuScreen.MenuScreen;
-
-import java.util.Scanner;
+import ui.ChatScreen;
+import ui.LoginScreen;
+import ui.RegisterScreen;
+import javax.swing.*;
 
 public class App {
     public static void run() {
-        Scanner sc = new Scanner(System.in);
-        boolean running = true;
-        while(running) {
-            MenuScreen.menuInit();
-            int choice = sc.nextInt();
-            switch (choice) {
-                case 1:
-                    MenuScreen.menuSignUp();
-                    break;
-                case 2:
-                    boolean logged = MenuScreen.menuSignIn();;
-                    while (!logged) {
-                       logged = MenuScreen.menuSignIn();
-                    }
-
-                    MenuScreen.menuMainOptions();
-                    break;
-                case 3:
-                    System.out.println("Saindo...");
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Opção inválida! Tente novamente.");
-            }
-
-          }
-        }
-
+        // Configurações básicas para garantir que a UI seja thread-safe
+        // Inicia a tela de login
+        SwingUtilities.invokeLater(App::showLoginScreen);
     }
 
+    public static void showLoginScreen() {
+        // Cria e exibe a tela de login
+        LoginScreen loginScreen = new LoginScreen();
+        loginScreen.setVisible(true);
+    }
 
+    public static void showRegisterScreen() {
+        // Cria e exibe a tela de registro
+        RegisterScreen registerScreen = new RegisterScreen();
+        registerScreen.setVisible(true);
+    }
+
+    public static void showChatScreen() {
+        // Cria e exibe a tela de chat
+        ChatScreen chatScreen = new ChatScreen();
+        chatScreen.setVisible(true);
+    }
+}

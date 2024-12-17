@@ -9,7 +9,5 @@ public class MessageController {
         MessageList.add(newMessage);
     }
 
-    public static void printMessages() {
-        MessageList.showMessages();
-    }
+
 }

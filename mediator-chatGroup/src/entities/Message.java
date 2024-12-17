@@ -10,8 +10,12 @@ public class Message {
         this.remetente = UserController.getUserLogged();
     }
 
+    public User getRemetente() {
+        return remetente;
+    }
+
     @Override
     public String toString() {
-        return remetente.getNome() + ": " + this.text;
+        return  this.text;
     }
 }
