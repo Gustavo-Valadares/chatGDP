@@ -14,7 +14,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 
-public class ChatScreen extends JFrame {
+public class
+ChatScreen extends JFrame {
     private JTextArea chatArea; // Exibe as mensagens do chat
     private JTextField inputField; // Campo de entrada para novas mensagens
     private JButton sendButton; // Botão de enviar
