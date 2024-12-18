@@ -16,13 +16,12 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Objects;
 
-public class
-ChatScreen extends JFrame {
+public class ChatScreen extends JFrame {
     private JTextArea chatArea; // Exibe as mensagens do chat
     private JTextField inputField; // Campo de entrada para novas mensagens
     private JButton sendButton; // Botão de enviar
     private JButton exitButton; // Botão de sair
-    private JButton deleteUserButton; //Botão para deletar usuário
+    private JButton deleteUserButton; // Botão para deletar usuário
     private JList<Message> messageList; // Lista de mensagens
     private DefaultListModel<Message> messageListModel; // Modelo da lista de mensagens
 
@@ -31,6 +30,7 @@ ChatScreen extends JFrame {
         setSize(800, 600); // Tamanho maior para a tela
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
         // Componentes
         inputField = new JTextField();
         sendButton = new JButton("Enviar");
@@ -40,7 +40,7 @@ ChatScreen extends JFrame {
         // Modelo e lista de mensagens
         messageListModel = MessageList.getListModel();
         messageList = new JList<>(messageListModel);
-        messageList.setCellRenderer(new MessageRenderer());
+        messageList.setCellRenderer(new MessageRenderer(client)); // Passando o cliente
 
         // Layout
         setLayout(new BorderLayout());
@@ -59,10 +59,8 @@ ChatScreen extends JFrame {
                 String text = inputField.getText().trim(); // Obtém o texto do campo de entrada
                 if (!text.isEmpty()) {
                     try {
-                        System.out.println("response");
                         // Obtém nome e email a partir da resposta do servidor
                         String response = client.sendMessage("findEmail:" + client.email);
-                        System.out.println(response);
                         String[] userDetails = response.split(",");
 
                         if (userDetails.length < 2) {
@@ -79,17 +77,26 @@ ChatScreen extends JFrame {
                         String email = userDetails[1].trim();
 
                         // Prepara a requisição para enviar a mensagem
-                        String request = "sendMessage:" + nome + "," + text + "," + email;
+                        String request = "sendMessage:" + nome + "," + email + "," + text;
 
                         // Envia a mensagem ao servidor
                         try {
                             String serverResponse = client.sendMessage(request);
-                            JOptionPane.showMessageDialog(
-                                    null,
-                                    "Resposta do servidor: " + serverResponse,
-                                    "Mensagem Enviada",
-                                    JOptionPane.INFORMATION_MESSAGE
-                            );
+                            if (serverResponse.equalsIgnoreCase("Mensagem enviada")) {
+                                // Adiciona a mensagem ao modelo local
+                                Message newMessage = new Message(nome, text, email);
+                                messageListModel.addElement(newMessage);
+
+                                // Rola para a última mensagem
+                                messageList.ensureIndexIsVisible(messageListModel.getSize() - 1);
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "Erro ao enviar mensagem. Tente novamente.",
+                                        "Erro",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                            }
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(
                                     null,
@@ -112,22 +119,24 @@ ChatScreen extends JFrame {
             }
         };
 
-
         // Associando a ação ao clique do botão
         sendButton.addActionListener(sendAction);
 
-        //Associando a tecla Enter à mesma ação
+        // Associando a tecla Enter à mesma ação
         InputMap inputMap = sendButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = sendButton.getActionMap();
         inputMap.put(KeyStroke.getKeyStroke("ENTER"), "sendAction");
         actionMap.put("sendAction", sendAction);
 
-
         // Ação do botão "Sair"
         Action exitAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                UserController.setUserLogged(null); // Desloga o usuário
+                try {
+                    client.closeConnection(); // Desloga o usuário
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 new LoginScreen().setVisible(true); // Abre a tela de login
                 dispose(); // Fecha a tela atual
             }
@@ -136,22 +145,28 @@ ChatScreen extends JFrame {
         // Associando a ação ao clique do botão
         exitButton.addActionListener(exitAction);
 
-        //Associando a tecla Enter à mesma ação
+        // Associando a tecla ESC ao sair
         InputMap inputMap2 = exitButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap2 = exitButton.getActionMap();
         inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "exitAction");
         actionMap2.put("exitAction", exitAction);
 
-
         // Botão Excluir
         deleteUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                UserController.remove(UserController.getUserLogged().getEmail());
+                String message = "removeUser:" + client.email;
+                try {
+                    client.sendMessage(message);
+                    client.closeConnection();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 new LoginScreen().setVisible(true);
                 dispose();
             }
         });
+
         // Personalização dos componentes
         customizeComponents();
     }
@@ -202,6 +217,7 @@ ChatScreen extends JFrame {
             }
         });
 
+        // Botão "Excluir"
         deleteUserButton.setFont(new Font("Arial", Font.PLAIN, 14));
         deleteUserButton.setBackground(new Color(220, 20, 60));
         deleteUserButton.setForeground(Color.WHITE);
@@ -211,7 +227,6 @@ ChatScreen extends JFrame {
         deleteUserButton.setOpaque(true);
         deleteUserButton.setUI(new BasicButtonUI()); // Remover borda do botão padrão
 
-
         // Caixa de entrada (input)
         inputField.setFont(new Font("Arial", Font.PLAIN, 14));
         inputField.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
@@ -220,16 +235,16 @@ ChatScreen extends JFrame {
         inputField.setCaretColor(Color.BLACK);
         inputField.setPreferredSize(new Dimension(350, 30));
         inputField.setFocusTraversalKeysEnabled(false);
-
-
     }
 
     // Renderer para personalizar a exibição das mensagens na lista
     private static class MessageRenderer extends JPanel implements ListCellRenderer<Message> {
         private JLabel messageText;  // Texto da mensagem
-        private JLabel userLabel;    // Nome do usuário
+        private JLabel userLabel; // Nome do usuário
+        private Client client; // Referência ao Client
 
-        public MessageRenderer() {
+        public MessageRenderer(Client client) {
+            this.client = client; // Inicializa o cliente
             setLayout(new BorderLayout(10, 5)); // Layout para organizar os componentes
 
             // Inicializa os componentes
@@ -250,23 +265,27 @@ ChatScreen extends JFrame {
         @Override
         public Component getListCellRendererComponent(JList<? extends Message> list, Message message, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
+            try {
+                // Configura o texto do usuário e da mensagem
+                userLabel.setText(message.toString().split("&")[0]);
+                messageText.setText(message.toString().split("&")[2]); // Permite formatação HTML
 
-            // Configura o texto do usuário e da mensagem
-            userLabel.setText(message.toString().split("&")[0]);
-            messageText.setText(message.toString().split("&")[2]); // Permite formatação HTML
+                // Alinha e define as cores de fundo dependendo do remetente
+                String currentUserEmail = client.email;
+                if (Objects.equals(message.toString().split("&")[1], currentUserEmail)) {
+                    setBackground(new Color(230, 245, 255)); // Mensagens do usuário logado com fundo suave
+                    setLayout(new FlowLayout(FlowLayout.LEFT)); // Alinha à esquerda
+                } else {
+                    setBackground(Color.WHITE); // Mensagens de outros usuários
+                    setLayout(new FlowLayout(FlowLayout.RIGHT)); // Alinha à direita
+                }
 
-            // Alinha e define as cores de fundo dependendo do remetente
-            if (Objects.equals(message.toString().split("&")[1], UserController.getUserLogged().getEmail())) {
-                setBackground(new Color(230, 245, 255)); // Mensagens do usuário logado com fundo suave
-                setLayout(new FlowLayout(FlowLayout.LEFT)); // Alinha à esquerda
-            } else {
-                setBackground(Color.WHITE); // Mensagens de outros usuários
-                setLayout(new FlowLayout(FlowLayout.RIGHT)); // Alinha à direita
-            }
-
-            // Se a célula estiver selecionada, altere a cor de fundo
-            if (isSelected) {
-                setBackground(new Color(200, 220, 240)); // Cor de fundo ao selecionar
+                // Se a célula estiver selecionada, altere a cor de fundo
+                if (isSelected) {
+                    setBackground(new Color(200, 220, 240)); // Cor de fundo ao selecionar
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
 
             return this;

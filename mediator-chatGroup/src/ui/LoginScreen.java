@@ -98,12 +98,13 @@ public class LoginScreen extends JFrame {
                 }
 
                 // Tenta realizar o login
-                try (Client client = new Client("localhost", 12345, email)) {
+                try  {
+                    Client client = new Client("localhost", 12345, email);
                     String request = "signin:" + email + "," + password;
                     String response = client.sendMessage(request); // Envia a mensagem ao servidor e recebe a resposta
 
                     if ("Login bem-sucedido".equals(response)) {
-                        JOptionPane.showMessageDialog(null, "Login realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        //JOptionPane.showMessageDialog(null, "Login realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                         new ChatScreen(client).setVisible(true); // Abre a tela do chat
                         dispose(); // Fecha a tela de login
                     } else {

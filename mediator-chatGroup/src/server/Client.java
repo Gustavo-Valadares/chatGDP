@@ -3,7 +3,7 @@ package server;
 import java.io.*;
 import java.net.*;
 
-public class Client implements AutoCloseable {
+public class Client  {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
@@ -21,15 +21,10 @@ public class Client implements AutoCloseable {
         return in.readLine(); // Lê a resposta do servidor
     }
 
-    // Método para fechar a conexão manualmente quando o botão de sair for clicado
+    // Metodo para fechar a conexão manualmente quando o botão de sair for clicado
     public void closeConnection() throws IOException {
         if (out != null) out.close();
         if (in != null) in.close();
         if (socket != null) socket.close();
-    }
-
-    @Override
-    public void close() throws IOException {
-        closeConnection(); // Implementa o método AutoCloseable, mas não o chama automaticamente
     }
 }

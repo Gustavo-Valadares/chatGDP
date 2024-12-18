@@ -5,7 +5,7 @@ import controllers.UserController;
 import entities.User;
 
 public class Mediator {
-    public static boolean sendMessage(String nome, String text, String email) {
+    public static boolean sendMessage(String nome, String email, String text) {
         return MessageController.createMessage(nome, text, email);
     }
 

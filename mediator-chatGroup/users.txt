@@ -1,5 +1,2 @@
-
-yan,yan@mail.com,1234
 yan,y,1
 g,g,1
-b,b,2

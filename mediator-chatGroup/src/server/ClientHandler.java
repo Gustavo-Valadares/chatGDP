@@ -65,6 +65,12 @@ public class ClientHandler implements Runnable {
                 } else {
                     return "Parâmetros inválidos para buscar usuário";
                 }
+            case "removeUser":
+                if (params.length >= 1) {
+                    return Mediator.remove(params[0]) ? "Usuário removido com sucesso" : "Falha ao remover usuário";
+                } else {
+                    return "Parâmetros inválidos para remoção de usuário";
+                }
             default:
                 return "Comando desconhecido";
         }

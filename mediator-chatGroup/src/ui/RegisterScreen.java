@@ -99,7 +99,8 @@ public class RegisterScreen extends JFrame {
                 String password = new String(passwordField.getPassword());
 
                 // Conectar ao servidor e enviar os dados
-                try (Client client = new Client("localhost", 12345, email)) {
+                try  {
+                    Client client = new Client("localhost", 12345, email);
                     String request = "signup:" + name + "," + password + "," + email;
                     String response = client.sendMessage(request); // Envia a mensagem ao servidor e recebe a resposta
 
