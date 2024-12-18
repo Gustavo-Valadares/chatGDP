@@ -88,24 +88,43 @@ public class RegisterScreen extends JFrame {
         // Colocando o painel de cadastro no centro da tela
         add(panel, BorderLayout.CENTER);
 
+        InputMap inputMap = registerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = registerButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
         // Ação dos botões
-        registerButton.addActionListener(new ActionListener() {
+        actionMap.put("clickButton", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String name = usernameField.getText();
-                String email = emailField.getText();
-                String password = new String(passwordField.getPassword());
-                if (UserController.signUp(name, password, email)) {
-                    JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso.");
-                    new LoginScreen().setVisible(true);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Email já está em uso");
+                try {
+                    String name = usernameField.getText().trim();
+                    String email = emailField.getText().trim();
+                    String password = new String(passwordField.getPassword()).trim();
+
+                    // Verificar se algum campo está vazio
+                    if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                        throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");
+                    }
+
+                    // Tentativa de salvar o usuário
+                    if (UserController.signUp(name, password, email)) {
+                        JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso.");
+                        new LoginScreen().setVisible(true);
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Email já está em uso.");
+                    }
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Ocorreu um erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        backButton.addActionListener(new ActionListener() {
+        InputMap inputMap2 = backButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap2 = backButton.getActionMap();
+        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "clickButton");
+        actionMap2.put("clickButton", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new LoginScreen().setVisible(true);

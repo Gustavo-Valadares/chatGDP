@@ -84,7 +84,10 @@ public class LoginScreen extends JFrame {
         add(panel, BorderLayout.CENTER);
 
         // Ação dos botões
-        loginButton.addActionListener(new ActionListener() {
+        InputMap inputMap = loginButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = loginButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
+        actionMap.put("clickButton", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String email = usernameField.getText();

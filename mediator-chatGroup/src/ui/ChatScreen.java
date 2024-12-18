@@ -52,7 +52,10 @@ ChatScreen extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Ação do botão "Enviar"
-        sendButton.addActionListener(new ActionListener() {
+        InputMap inputMap = sendButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = sendButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
+        actionMap.put("clickButton", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String text = inputField.getText().trim();
@@ -64,7 +67,10 @@ ChatScreen extends JFrame {
         });
 
         // Ação do botão "Sair"
-        exitButton.addActionListener(new ActionListener() {
+        InputMap inputMap2 = exitButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap2 = exitButton.getActionMap();
+        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "clickButton");
+        actionMap2.put("clickButton", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 UserController.setUserLogged(null); // Desloga o usuário
