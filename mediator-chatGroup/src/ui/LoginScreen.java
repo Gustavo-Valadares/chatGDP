@@ -1,6 +1,7 @@
 package ui;
 
 import controllers.UserController;
+import server.Client;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
@@ -9,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public class LoginScreen extends JFrame {
     private JTextField usernameField;
@@ -83,23 +85,45 @@ public class LoginScreen extends JFrame {
         // Colocando o painel de login no centro da tela
         add(panel, BorderLayout.CENTER);
 
-        // Ação dos botões
-        InputMap inputMap = loginButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = loginButton.getActionMap();
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
-        actionMap.put("clickButton", new AbstractAction() {
+// Ação do botão "Login"
+        Action loginAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String email = usernameField.getText();
-                String password = new String(passwordField.getPassword());
-                if (UserController.signIn(email, password)) {
-                    new ChatScreen().setVisible(true);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Usuário ou senha incorretos.");
+                String email = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
+
+                if (email.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos.", "Campos Vazios", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Tenta realizar o login
+                try (Client client = new Client("localhost", 12345, email)) {
+                    String request = "signin:" + email + "," + password;
+                    String response = client.sendMessage(request); // Envia a mensagem ao servidor e recebe a resposta
+
+                    if ("Login bem-sucedido".equals(response)) {
+                        JOptionPane.showMessageDialog(null, "Login realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                        new ChatScreen(client).setVisible(true); // Abre a tela do chat
+                        dispose(); // Fecha a tela de login
+                    } else {
+                        System.out.println("Erro de Login");
+                    }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao se conectar ao servidor: " + ex.getMessage(), "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        });
+        };
+
+        // Associando a ação ao clique do botão
+        loginButton.addActionListener(loginAction);
+
+        //Associando a tecla Enter à mesma ação
+        InputMap inputMap = loginButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = loginButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "loginAction");
+        actionMap.put("loginAction", loginAction);
+
 
         registerButton.addActionListener(new ActionListener() {
             @Override
@@ -177,6 +201,4 @@ public class LoginScreen extends JFrame {
             }
         });
     }
-
-
 }

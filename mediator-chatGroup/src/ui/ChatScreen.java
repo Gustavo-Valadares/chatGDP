@@ -3,6 +3,7 @@ package ui;
 import controllers.UserController;
 import entities.Message;
 import mediator.Mediator;
+import server.Client;
 import structData.MessageList;
 
 import javax.swing.*;
@@ -12,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Objects;
 
 public class
@@ -24,12 +26,11 @@ ChatScreen extends JFrame {
     private JList<Message> messageList; // Lista de mensagens
     private DefaultListModel<Message> messageListModel; // Modelo da lista de mensagens
 
-    public ChatScreen() {
+    public ChatScreen(Client client) {
         setTitle("Chat em Grupo");
         setSize(800, 600); // Tamanho maior para a tela
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
         // Componentes
         inputField = new JTextField();
         sendButton = new JButton("Enviar");
@@ -51,33 +52,96 @@ ChatScreen extends JFrame {
         bottomPanel.add(deleteUserButton, BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Ação do botão "Enviar"
-        InputMap inputMap = sendButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = sendButton.getActionMap();
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
-        actionMap.put("clickButton", new AbstractAction() {
+        // Configuração para enviar mensagem ao pressionar "Enter" no campo de entrada
+        Action sendAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String text = inputField.getText().trim();
+                String text = inputField.getText().trim(); // Obtém o texto do campo de entrada
                 if (!text.isEmpty()) {
-                    Mediator.sendMessage(UserController.getUserLogged().getNome(),text, UserController.getUserLogged().getEmail()); // Envia a mensagem
-                    inputField.setText(""); // Limpa o campo de entrada
+                    try {
+                        System.out.println("response");
+                        // Obtém nome e email a partir da resposta do servidor
+                        String response = client.sendMessage("findEmail:" + client.email);
+                        System.out.println(response);
+                        String[] userDetails = response.split(",");
+
+                        if (userDetails.length < 2) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Erro ao obter detalhes do usuário. Resposta inválida do servidor.",
+                                    "Erro",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                            return;
+                        }
+
+                        String nome = userDetails[0].trim();
+                        String email = userDetails[1].trim();
+
+                        // Prepara a requisição para enviar a mensagem
+                        String request = "sendMessage:" + nome + "," + text + "," + email;
+
+                        // Envia a mensagem ao servidor
+                        try {
+                            String serverResponse = client.sendMessage(request);
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Resposta do servidor: " + serverResponse,
+                                    "Mensagem Enviada",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Erro ao enviar mensagem: " + ex.getMessage(),
+                                    "Erro",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Erro ao buscar detalhes do usuário: " + ex.getMessage(),
+                                "Erro",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    } finally {
+                        inputField.setText(""); // Limpa o campo de entrada, independentemente do resultado
+                    }
                 }
             }
-        });
+        };
+
+
+        // Associando a ação ao clique do botão
+        sendButton.addActionListener(sendAction);
+
+        //Associando a tecla Enter à mesma ação
+        InputMap inputMap = sendButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = sendButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "sendAction");
+        actionMap.put("sendAction", sendAction);
+
 
         // Ação do botão "Sair"
-        InputMap inputMap2 = exitButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap2 = exitButton.getActionMap();
-        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "clickButton");
-        actionMap2.put("clickButton", new AbstractAction() {
+        Action exitAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 UserController.setUserLogged(null); // Desloga o usuário
                 new LoginScreen().setVisible(true); // Abre a tela de login
                 dispose(); // Fecha a tela atual
             }
-        });
+        };
+
+        // Associando a ação ao clique do botão
+        exitButton.addActionListener(exitAction);
+
+        //Associando a tecla Enter à mesma ação
+        InputMap inputMap2 = exitButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap2 = exitButton.getActionMap();
+        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "exitAction");
+        actionMap2.put("exitAction", exitAction);
+
 
         // Botão Excluir
         deleteUserButton.addActionListener(new ActionListener() {

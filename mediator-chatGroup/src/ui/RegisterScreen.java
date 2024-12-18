@@ -1,11 +1,13 @@
 package ui;
 
 import controllers.UserController;
+import server.Client;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class RegisterScreen extends JFrame {
     private JTextField usernameField;
@@ -88,49 +90,61 @@ public class RegisterScreen extends JFrame {
         // Colocando o painel de cadastro no centro da tela
         add(panel, BorderLayout.CENTER);
 
-        InputMap inputMap = registerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = registerButton.getActionMap();
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "clickButton");
         // Ação dos botões
-        actionMap.put("clickButton", new AbstractAction() {
+        Action registerAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String name = usernameField.getText().trim();
-                    String email = emailField.getText().trim();
-                    String password = new String(passwordField.getPassword()).trim();
+                String name = usernameField.getText();
+                String email = emailField.getText();
+                String password = new String(passwordField.getPassword());
 
-                    // Verificar se algum campo está vazio
-                    if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                        throw new IllegalArgumentException("Todos os campos devem ser preenchidos.");
-                    }
+                // Conectar ao servidor e enviar os dados
+                try (Client client = new Client("localhost", 12345, email)) {
+                    String request = "signup:" + name + "," + password + "," + email;
+                    String response = client.sendMessage(request); // Envia a mensagem ao servidor e recebe a resposta
 
-                    // Tentativa de salvar o usuário
-                    if (UserController.signUp(name, password, email)) {
+                    // Exibe a resposta do servidor
+                    if (response.equals("Cadastro bem-sucedido")) {
                         JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso.");
-                        new LoginScreen().setVisible(true);
+                        new ChatScreen(client).setVisible(true);
                         dispose();
                     } else {
-                        JOptionPane.showMessageDialog(null, "Email já está em uso.");
+                        JOptionPane.showMessageDialog(null, response); // Exibe a mensagem de erro do servidor
                     }
-                } catch (IllegalArgumentException ex) {
-                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Ocorreu um erro inesperado: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao se conectar ao servidor: " + ex.getMessage());
                 }
             }
-        });
+        };
 
-        InputMap inputMap2 = backButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap2 = backButton.getActionMap();
-        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "clickButton");
-        actionMap2.put("clickButton", new AbstractAction() {
+        // Associando a ação ao clique do botão
+        registerButton.addActionListener(registerAction);
+
+        //Associando a tecla Enter à mesma ação
+        InputMap inputMap = registerButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = registerButton.getActionMap();
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "registerAction");
+        actionMap.put("registerAction", registerAction);
+
+        
+        //Botão Voltar
+        Action backAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new LoginScreen().setVisible(true);
                 dispose();
             }
-        });
+        };
+
+        // Associando a ação ao clique do botão
+        backButton.addActionListener(backAction);
+
+        //Associando a tecla Enter à mesma ação
+        InputMap inputMap2 = backButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap2 = backButton.getActionMap();
+        inputMap2.put(KeyStroke.getKeyStroke("ESCAPE"), "backAction");
+        actionMap2.put("backAction", backAction);
+
 
         // Personalização dos componentes
         customizeComponents();

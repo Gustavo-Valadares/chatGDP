@@ -2,23 +2,23 @@ package controllers;
 import entities.User;
 import structData.UserList;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class UserController {
-    private static User userLogged;
+    public static User userLogged;
 
     public static User getUserLogged() {
         return userLogged;
     }
 
-    public static void setUserLogged(User userLogged) {
-        UserController.userLogged = userLogged;
+    public static void setUserLogged(User userLogged) { UserController.userLogged = userLogged;
+        System.out.println("setou userLogged");
     }
 
-    private static boolean createUser(String nome, String senha, String email) {
+    private static void createUser(String nome, String senha, String email) {
         User newUser = new User(nome, senha, email);
         UserList.add(newUser);
-        return true;
+        setUserLogged(newUser);
+
     }
 
     public static void printUsers(){
@@ -38,7 +38,10 @@ public class UserController {
         if(userExist != null) {
             return false;
         }
-       return createUser(nome, senha, email);
+        createUser(nome, senha, email);
+        System.out.println(getUserLogged().getNome());
+        return true;
+
 
 
     }
@@ -50,6 +53,7 @@ public class UserController {
         }
         if(Objects.equals(userExist.getEmail(), email) && Objects.equals(userExist.getSenha(), senha) ) {
             setUserLogged(userExist);
+            System.out.println("setou usuario na hora de logar com email: " + " " + getUserLogged().getEmail() + " senha: " + getUserLogged().getSenha());
             return true;
         } else {
             return false;

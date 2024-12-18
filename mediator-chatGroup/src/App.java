@@ -1,6 +1,4 @@
-import ui.ChatScreen;
 import ui.LoginScreen;
-import ui.RegisterScreen;
 
 import javax.swing.*;
 import java.io.File;
@@ -15,8 +13,11 @@ public class App {
         // Inicializa os arquivos necessários
         initializeFiles();
 
-        // Configurações básicas para garantir que a UI seja thread-safe
-        SwingUtilities.invokeLater(App::showLoginScreen);
+        // Inicializa a interface gráfica
+        SwingUtilities.invokeLater(() -> {
+            LoginScreen loginScreen = new LoginScreen();
+            loginScreen.setVisible(true); // Torna a tela de login visível
+        });
     }
 
     private static void initializeFiles() {
@@ -38,23 +39,5 @@ public class App {
             System.err.println("Erro ao inicializar os arquivos.");
             e.printStackTrace();
         }
-    }
-
-    public static void showLoginScreen() {
-        // Cria e exibe a tela de login
-        LoginScreen loginScreen = new LoginScreen();
-        loginScreen.setVisible(true);
-    }
-
-    public static void showRegisterScreen() {
-        // Cria e exibe a tela de registro
-        RegisterScreen registerScreen = new RegisterScreen();
-        registerScreen.setVisible(true);
-    }
-
-    public static void showChatScreen() {
-        // Cria e exibe a tela de chat
-        ChatScreen chatScreen = new ChatScreen();
-        chatScreen.setVisible(true);
     }
 }
