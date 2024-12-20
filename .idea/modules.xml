@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/chaGDP.iml" filepath="$PROJECT_DIR$/chaGDP.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/chatGDP.iml" filepath="$PROJECT_DIR$/chatGDP.iml" />
+>>>>>>> 35a28bfafbb391a57af259fbee49efbc266c525d
     </modules>
   </component>
 </project>

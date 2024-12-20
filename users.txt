@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 tiago,t@gmail.com,1234
 yan,y@gmail.com,1234
 gustavo,g@gmail.com,1234
+=======
+gustavo,g@mail.com,1234
+yan,y@mail.com,1234
+>>>>>>> 35a28bfafbb391a57af259fbee49efbc266c525d

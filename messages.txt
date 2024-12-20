@@ -1,4 +1,5 @@
 gustavo&g@mail.com&ola
+<<<<<<< HEAD
 gustavo&g@mail.com&como vão?
 tiago&t@gmail.com&vou bem mano
 yan&y@gmail.com&to bem tbm rapazes
@@ -10,3 +11,10 @@ yan&y@gmail.com&opa
 gustavo&g@gmail.com&essa conta é nova
 gustavo&g@gmail.com&sadf
 gustavo&g@gmail.com&teste
+=======
+gustavo&g@mail.com&hold me now
+gustavo&g@mail.com&im six feet from the air and Im thinking
+gustavo&g@mail.com&maybe six feet
+gustavo&g@mail.com&aint so far down
+gustavo&g@mail.com&kguyg
+>>>>>>> 35a28bfafbb391a57af259fbee49efbc266c525d
